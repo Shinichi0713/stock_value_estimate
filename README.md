@@ -1,1 +1,8 @@
 # stock_value_estimate
+# やりたいこと
+LSTMにより株価予測モデルを作り、少なくとも3営業日先程度のスイングトレードに活用できるようにする
+
+参考論文
+https://reader.elsevier.com/reader/sd/pii/S1877050920304865?token=5FDF3E3A4697187DEFC3F0EFE0C2F6C8844529F3D5643352620F7EBB7ECF685926824BCE52BB7BC311F2C4511CAF5729&originRegion=us-east-1&originCreation=20220131034120
+
+
