@@ -33,3 +33,11 @@ LSTMモデルの隠れ層、レイヤ数を変えて予測するようにする�
 ![image](https://github.com/Shinichi0713/stock_value_estimate/assets/61480734/deada9f7-26f6-4cf9-8a94-7a04fac107a0)
 
 ![image](https://github.com/Shinichi0713/stock_value_estimate/assets/61480734/3d4ad251-507c-49a7-bd48-238a4b0ce990)
+
+# 実際の予測
+実際のデータで予測してみた場合
+![image](https://github.com/Shinichi0713/stock_value_estimate/assets/61480734/0bb69f73-2161-4e5d-8b39-64694f9e3944)
+
+むむ。。。。
+この株、明日下がりそう。。。
+
