@@ -18,6 +18,13 @@ MS&AD社の株価をターゲットとする
 
 
 # 学習後の推定結果
-
+初めのデータのみ実データで、以降のデータは実データを削除→モデルの推定値で置き換えとして予測を行った。<br>
+データは3か月分を予測させたが初日の動向程度であれば予測できそうであることが分かった。<br>
+他方、長期のトレンドはいずれも上昇というように予測されているが大外れをするケースがある。<br>
+また、長期になればなるほど、脈動が小さくなっていくことが確認された。<br>
+→LSTMによる長期の予測は、トレンドは予測できるかもしれないが、脈動や山の予測は難しい<br>
 ![image](https://github.com/Shinichi0713/stock_value_estimate/assets/61480734/85b02fc3-cca6-4599-b1a1-fe7ac9e76a8b)
 
+![image](https://github.com/Shinichi0713/stock_value_estimate/assets/61480734/deada9f7-26f6-4cf9-8a94-7a04fac107a0)
+
+![image](https://github.com/Shinichi0713/stock_value_estimate/assets/61480734/3d4ad251-507c-49a7-bd48-238a4b0ce990)
