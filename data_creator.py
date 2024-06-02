@@ -4,6 +4,7 @@ from pandas_datareader import data as wb
 import yfinance as yfin
 import torch
 import numpy as np
+from sklearn.model_selection import train_test_split
 import common_resource
 
 # yahooファイナンスから株価の時系列データを取得
@@ -67,14 +68,21 @@ def create_dataset():
         std_list=df.std().values
         df=(df-mean_list)/std_list
         inout_data = []
+        in_data = []
+        out_data = []
         for i in range(len(df)-common_resource.observation_period_num-common_resource.predict_period_num):
-            data=df.iloc[i:i+common_resource.observation_period_num,4].values
-            label=df.iloc[i+common_resource.predict_period_num:i+common_resource.observation_period_num+common_resource.predict_period_num,4].values
-            inout_data.append((data,label))
-        inout_data=torch.FloatTensor(inout_data)
+            for j in range(5):
+                data=df.iloc[i:i+common_resource.observation_period_num,j].values
+                in_data.append(data)
+                label=df.iloc[i+common_resource.observation_period_num:i+common_resource.observation_period_num+common_resource.predict_period_num,j].values
+                out_data.append(label)
+        in_data=np.array(in_data).reshape(-1,common_resource.observation_period_num*5)
+        out_data=np.array(out_data).reshape(-1,common_resource.predict_period_num*5)
+        inout_data=np.concatenate((in_data,out_data),axis=1)
+        dataset_train, dataset_eval = train_test_split(inout_data, test_size=0.3, random_state=0)
+        dataset_train=torch.FloatTensor(dataset_train)
+        dataset_eval=torch.FloatTensor(dataset_eval)
 
-        dataset_train=inout_data[:int(np.shape(inout_data)[0]*common_resource.train_rate)].to(device)
-        dataset_eval=inout_data[int(np.shape(inout_data)[0]*common_resource.train_rate):].to(device)
         datasets_train[key] = dataset_train
         datasets_eval[key] = dataset_eval
 
@@ -84,10 +92,10 @@ def create_dataset():
     return datasets_train, datasets_eval
 
 if __name__ == '__main__':
-    # create_dataset()
+    create_dataset()
 
-    dataframes = download_dataset()
-    show_data(dataframes)
+    # dataframes = download_dataset()
+    # show_data(dataframes)
 
 
 
