@@ -21,7 +21,7 @@ def download_dataset():
     ]
 
     # 取得開始日
-    start_date='2003-1-1'
+    start_date='2008-1-1'
     # 取得終了日
     end_date='2022-12-31'
 
@@ -71,15 +71,15 @@ def create_dataset():
         in_data = []
         out_data = []
         for i in range(len(df)-common_resource.observation_period_num-common_resource.predict_period_num):
-            for j in range(5):
+            for j in range(common_resource.num_explain):
                 data=df.iloc[i:i+common_resource.observation_period_num,j].values
                 in_data.append(data)
                 label=df.iloc[i+common_resource.observation_period_num:i+common_resource.observation_period_num+common_resource.predict_period_num,j].values
                 out_data.append(label)
-        in_data=np.array(in_data).reshape(-1,common_resource.observation_period_num*5)
-        out_data=np.array(out_data).reshape(-1,common_resource.predict_period_num*5)
+        in_data=np.array(in_data).reshape(-1,common_resource.observation_period_num*common_resource.num_explain)
+        out_data=np.array(out_data).reshape(-1,common_resource.predict_period_num*common_resource.num_explain)
         inout_data=np.concatenate((in_data,out_data),axis=1)
-        dataset_train, dataset_eval = train_test_split(inout_data, test_size=0.3, random_state=0)
+        dataset_train, dataset_eval = train_test_split(inout_data, test_size=0.2)
         dataset_train=torch.FloatTensor(dataset_train)
         dataset_eval=torch.FloatTensor(dataset_eval)
 
@@ -91,8 +91,38 @@ def create_dataset():
     
     return datasets_train, datasets_eval
 
+def create_data_evaluation():
+    # データ取得
+    dataframes = download_dataset()
+    # 時系列データ
+    datasets_output = {}
+
+    index_start = 140
+    for key, df in dataframes.items():
+        # 正規化
+        mean_list=df.mean().values
+        std_list=df.std().values
+        df=(df-mean_list)/std_list
+        inout_data = []
+        in_data = []
+        out_data = []
+        for i in range(len(df)-common_resource.observation_period_num-common_resource.predict_period_num-index_start, len(df)-common_resource.observation_period_num-common_resource.predict_period_num-index_start+100):
+            for j in range(common_resource.num_explain):
+                data=df.iloc[i:i+common_resource.observation_period_num,j].values
+                in_data.append(data)
+                label=df.iloc[i+common_resource.observation_period_num:i+common_resource.observation_period_num+common_resource.predict_period_num,j].values
+                out_data.append(label)
+        in_data=np.array(in_data).reshape(-1,common_resource.observation_period_num*common_resource.num_explain)
+        out_data=np.array(out_data).reshape(-1,common_resource.predict_period_num*common_resource.num_explain)
+        inout_data=np.concatenate((in_data,out_data),axis=1)
+        inout_data=torch.FloatTensor(inout_data)
+        datasets_output[key] = inout_data
+        print('train data：',np.shape(inout_data)[0])
+    
+    return datasets_output
+
 if __name__ == '__main__':
-    create_dataset()
+    create_data_evaluation()
 
     # dataframes = download_dataset()
     # show_data(dataframes)
