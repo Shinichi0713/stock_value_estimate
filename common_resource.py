@@ -5,3 +5,4 @@ hidden_size = 1000
 batch_size = 64
 lr = 0.0001
 num_explain = 5
+path_predict = 'target_stock.csv'

@@ -19,7 +19,7 @@ class StockPricePredictor(nn.Module):
         self.lstm = nn.LSTM(input_size, hidden_layer_size, num_layers, batch_first=True)
         # 線形レイヤー
         self.linear = nn.Linear(hidden_layer_size, output_size)
-        self.leaky_relu = nn.LeakyReLU(negative_slope=0.01)
+        self.activate = nn.Mish()
         # デバイス
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         # NNパラメータのロード
@@ -34,13 +34,14 @@ class StockPricePredictor(nn.Module):
         # c0 = torch.zeros(self.num_layers, input_seq.size(0), self.hidden_dim).to(self.device)
         
         # lstm_out, _ = self.lstm(input_seq.view(len(input_seq), 1, -1), (h0, c0))
-        lstm_out = self.leaky_relu(lstm_out)
+        lstm_out = self.activate(lstm_out)
         predictions = self.linear(lstm_out.view(len(input_seq), -1))
-        return torch.sigmoid(predictions)
+        return torch.tanh(predictions) * 7
 
 # データを分割してデータ化
 def get_batch(source, i, batch_size):
     seq_len=min(batch_size, len(source)-1-i)
+    seq_len=max(1, seq_len)
     data=source[i:i+seq_len]
     input=data[:, :common_resource.observation_period_num*common_resource.num_explain]
     target=data[:, common_resource.observation_period_num*common_resource.num_explain:]
@@ -133,13 +134,45 @@ def evaluate_model():
         ax1.legend()
         ax2 = fig.add_subplot(2, 1, 2)
         ax2.set_title("volume", fontsize=20)
-        ax2.plot(data_eval[:, 6], label='predict')
-        ax2.plot(data_real[:, 6], label='real')
+        ax2.plot(data_eval[:, -1], label='predict')
+        ax2.plot(data_real[:, -1], label='real')
         ax2.legend()
         plt.savefig(dir_current + f'/stock_{key_stock}.png')
         plt.show()
 
 
+def predict():
+    dir_current = os.path.dirname(__file__)
+
+    datasets_predict = data_creator.create_predict_dataset()
+    model = StockPricePredictor()
+    model.eval()
+    data_predict = []
+    with torch.no_grad():
+        x, _ = get_batch(datasets_predict, 0, 1)
+        for i in range(10):
+            x = x.to(model.device)  # 説明変数
+            output = model(x)
+            data_predict.append(output[0].cpu().numpy())
+            # 次の説明変数を作成
+            x = torch.cat([x[0, common_resource.num_explain:], output[0]]).view(1, -1)
+    data_predict = np.array(data_predict)
+    print(data_predict)
+    fig = plt.figure()
+    ax1 = fig.add_subplot(2, 1, 1)
+    ax1.set_title("close value", fontsize=20)
+    ax1.plot(data_predict[:, 3], label='predict')
+    ax1.plot(data_predict[:, 3], label='real')
+    ax1.legend()
+    ax2 = fig.add_subplot(2, 1, 2)
+    ax2.set_title("volume", fontsize=20)
+    ax2.plot(data_predict[:, -1], label='predict')
+    ax2.plot(data_predict[:, -1], label='real')
+    ax2.legend()
+    plt.savefig(dir_current + f'/stock_target.png')
+    plt.show()
+
 if __name__ == '__main__':
-    train_model()
-    evaluate_model()
+    # train_model()
+    # evaluate_model()
+    predict()

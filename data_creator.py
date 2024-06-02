@@ -6,6 +6,7 @@ import torch
 import numpy as np
 from sklearn.model_selection import train_test_split
 import common_resource
+import pandas as pd
 
 # yahooファイナンスから株価の時系列データを取得
 def download_dataset():
@@ -71,7 +72,7 @@ def create_dataset():
         in_data = []
         out_data = []
         for i in range(len(df)-common_resource.observation_period_num-common_resource.predict_period_num):
-            for j in range(common_resource.num_explain):
+            for j in [0,1,2,3,5]:
                 data=df.iloc[i:i+common_resource.observation_period_num,j].values
                 in_data.append(data)
                 label=df.iloc[i+common_resource.observation_period_num:i+common_resource.observation_period_num+common_resource.predict_period_num,j].values
@@ -97,7 +98,7 @@ def create_data_evaluation():
     # 時系列データ
     datasets_output = {}
 
-    index_start = 140
+    index_start = 100
     for key, df in dataframes.items():
         # 正規化
         mean_list=df.mean().values
@@ -107,7 +108,7 @@ def create_data_evaluation():
         in_data = []
         out_data = []
         for i in range(len(df)-common_resource.observation_period_num-common_resource.predict_period_num-index_start, len(df)-common_resource.observation_period_num-common_resource.predict_period_num-index_start+100):
-            for j in range(common_resource.num_explain):
+            for j in [0,1,2,3,5]:
                 data=df.iloc[i:i+common_resource.observation_period_num,j].values
                 in_data.append(data)
                 label=df.iloc[i+common_resource.observation_period_num:i+common_resource.observation_period_num+common_resource.predict_period_num,j].values
@@ -121,11 +122,38 @@ def create_data_evaluation():
     
     return datasets_output
 
+def create_predict_dataset():
+    import os
+    dir_current = os.path.dirname(__file__)
+    path_target = dir_current + '/' + common_resource.path_predict
+    # データ取得
+    df = pd.read_csv(path_target, header=0, index_col=0)
+    df["Open"] = (df["Open"].str.replace(",", "").astype(float))[::-1].values
+    df["High"] = (df["High"].str.replace(",", "").astype(float))[::-1].values
+    df["Low"] = (df["Low"].str.replace(",", "").astype(float))[::-1].values
+    df["Close"] = (df["Close"].str.replace(",", "").astype(float))[::-1].values
+    df["Volume"] = (df["Volume"].str.replace(",", "").astype(float))[::-1].values
+    mean_list=df.mean().values
+    std_list=df.std().values
+    dataframes=(df-mean_list)/std_list
+    in_data = []
+
+    for j in [0,1,2,3,5]:
+        data=dataframes.iloc[0:0+common_resource.observation_period_num,j].values
+        in_data.append(data)
+
+    in_data=np.array(in_data).reshape(-1,common_resource.observation_period_num*common_resource.num_explain)
+
+    in_data=torch.FloatTensor(in_data)
+    return in_data
+
 if __name__ == '__main__':
-    create_data_evaluation()
+    # create_data_evaluation()
 
     # dataframes = download_dataset()
     # show_data(dataframes)
+
+    print(create_predict_dataset())
 
 
 
