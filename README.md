@@ -10,3 +10,5 @@ https://reader.elsevier.com/reader/sd/pii/S1877050920304865?token=5FDF3E3A469718
 MS&AD社の株価をターゲットとする
 ![image](https://github.com/Shinichi0713/stock_value_estimate/assets/61480734/b842a2bd-12bf-4728-a117-1ff155a63d1c)
 
+
+400, 25, 2, 0.15207472257316113
