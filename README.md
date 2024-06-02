@@ -15,3 +15,9 @@ MS&AD社の株価をターゲットとする
 600, 25, 3, 0.11646148934960365<br>
 1000, 25, 4, 0.09665982890874147<br>
 隠れ層, データ数, レイヤ数
+
+
+# 学習後の推定結果
+
+![image](https://github.com/Shinichi0713/stock_value_estimate/assets/61480734/85b02fc3-cca6-4599-b1a1-fe7ac9e76a8b)
+
